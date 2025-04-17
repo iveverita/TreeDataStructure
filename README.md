@@ -16,7 +16,9 @@ The program uses a specialized data structure to represent family relationships 
 Usage:
 Download the repository and run the make file to assemble:
 ```bash
-make run
+make    	#to assemble
+make run	#to run
+make clean	#clean the repository from object files
 ``` 
 
 ## 🤝 Contributions & Feedback  
