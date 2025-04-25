@@ -9,20 +9,29 @@
 #define omega 0
 
 // Structures
-typedef struct s_date { Nat jour, mois, annee; } Date;
+typedef struct s_date { 
+    Nat jour; 
+    Nat mois; 
+    Nat annee;
+} Date;
 typedef Nat Ident;
-
 typedef struct s_individu {
     Car nom[LG_MAX];
     Date naiss;
     Date deces;
     Ident id;
-    Nat ipere, imere, icadet, ifaine;
+    Nat ipere; 
+    Nat imere; 
+    Nat icadet; 
+    Nat ifaine;
 } *Individu;
 
 typedef struct s_genealogie {
     Individu* tab;
-    Nat nb_individus, id_cur, taille_max_tab, taille_max_rang;
+    Nat nb_individus;
+    Nat id_cur;
+    Nat taille_max_tab;
+    Nat taille_max_rang;
     Nat* rang;
 } *Genealogie;
 
@@ -328,7 +337,9 @@ void affiche_oncles(Genealogie g, Ident x, Chaine buff) {
     if (g == NULL || x == omega) return;
     Individu current = getByIdent(g, x);
     if (current == NULL) return;
-    Ident parents[2] = {current->ipere, current->imere}; 
+    Ident parents[2];
+    parents[0] = current->ipere;
+    parents[1] = current->imere; 
     for (Nat i = 0; i < 2; i++) { // Parcours des freres/soeurs de chaque parent
         if (parents[i] != omega) {
             Individu parent = getByIdent(g, parents[i]);
@@ -475,7 +486,7 @@ void affiche_parente(Genealogie g, Ident x, Chaine buff) {
     for (Nat i = 1; i <= maxLevel; i++) {
         if (levels[i][0] != '\0') {
             chaineConcat(buff, " - ");
-            char levelStr[3];
+            Car levelStr[3];
             if (i < 10) { levelStr[0] = '0' + i; levelStr[1] = '\0';
             } else {levelStr[0] = '1';levelStr[1] = '0';levelStr[2] = '\0';}
             chaineConcat(buff, levelStr);
