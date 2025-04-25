@@ -64,7 +64,7 @@ void affiche_parente(Genealogie g, Ident x, Chaine buf);
 void affiche_descendance(Genealogie g, Ident x, Chaine buf);
 
 // PROTOTYPES DE VOS FONCTIONS INTERMEDIAIRES
-void affiche_descendance_recursive(Genealogie g, Ident x, int level, Chaine* levels, int* maxLevel);
+void affiche_descendance_recursive(Genealogie g, Ident x, Nat level, Chaine* levels, Nat* maxLevel);
 Chaine chercherChaine(Chaine haystack, Chaine needle);
 void addToBuffer(Chaine buff, Chaine nom);
 Nat dateNull(Date d1);
@@ -158,7 +158,7 @@ Nat getPos(Genealogie g, Chaine name) {
         Nat mid = left + (right - left) / 2; 
         if (mid >= g->nb_individus || g->tab[mid] == NULL) {
             return result;}
-        int cmp = chaineCompare(name, g->tab[mid]->nom);
+        Nat cmp = chaineCompare(name, g->tab[mid]->nom);
         if (cmp <= 0) {result = mid; right = mid - 1;
         } else {left = mid + 1;}}
     return result;
@@ -220,13 +220,13 @@ void adjFils(Genealogie g, Ident idx, Ident fils, Ident p, Ident m) {
         if (mere != NULL) mere->ifaine = idx;
         return;}
     Individu filsAine = getByIdent(g, fils); if (filsAine == NULL) return;
-    int dateComp = compDate(newChild->naiss, filsAine->naiss); // Comparons les date de naissance avec l'enfaine aine
+    Nat dateComp = compDate(newChild->naiss, filsAine->naiss); // Comparons les date de naissance avec l'enfaine aine
     if (dateComp < 0) { // Si idx est le plus grand
         newChild->icadet = fils;
         if (pere != NULL && pere->ifaine == fils) pere->ifaine = idx;
         if (mere != NULL && mere->ifaine == fils) mere->ifaine = idx;
     } else if (dateComp == 0) { // Si ils ont la meme date de naissance alors on tri par nom
-        int nomComp = chaineCompare(newChild->nom, filsAine->nom);
+        Nat nomComp = chaineCompare(newChild->nom, filsAine->nom);
         if (nomComp < 0) { 
             newChild->icadet = fils;
             if (pere != NULL && pere->ifaine == fils) pere->ifaine = idx;
@@ -304,11 +304,11 @@ void affiche_cousins(Genealogie g, Ident x, Chaine buff) {
     if (current == NULL) return;
     Ident parents[2] = {current->ipere, current->imere};
     
-    for (int i = 0; i < 2; i++) { // Parcours des freres/soeurs de chaque parent
+    for (Nat i = 0; i < 2; i++) { // Parcours des freres/soeurs de chaque parent
         if (parents[i] != omega) {
             Individu parent = getByIdent(g, parents[i]);        
             Ident grandparents[2] = {parent->ipere, parent->imere};
-            for (int j = 0; j < 2; j++) { 
+            for (Nat j = 0; j < 2; j++) { 
                 if (grandparents[j] != omega) {
                     Individu grandparent = getByIdent(g, grandparents[j]);
                     Ident siblingId = grandparent->ifaine; // On recupere la liste des freres/soeurs de chaque parent
@@ -328,11 +328,11 @@ void affiche_oncles(Genealogie g, Ident x, Chaine buff) {
     Individu current = getByIdent(g, x);
     if (current == NULL) return;
     Ident parents[2] = {current->ipere, current->imere}; 
-    for (int i = 0; i < 2; i++) { // Parcours des freres/soeurs de chaque parent
+    for (Nat i = 0; i < 2; i++) { // Parcours des freres/soeurs de chaque parent
         if (parents[i] != omega) {
             Individu parent = getByIdent(g, parents[i]);
             Ident grandparents[2] = {parent->ipere, parent->imere}; 
-            for (int j = 0; j < 2; j++) {
+            for (Nat j = 0; j < 2; j++) {
                 if (grandparents[j] != omega) {
                     Individu grandparent = getByIdent(g, grandparents[j]);
                     Ident siblingId = grandparent->ifaine; // On recupere la liste des freres/soeurs de chaque parent
@@ -481,13 +481,13 @@ void affiche_descendance(Genealogie g, Ident x, Chaine buff) {
     buff[0] = '\0';  
     if (g == NULL || x == omega) return;
     Chaine levels[10];
-    for (int i = 0; i < 10; i++) {
+    for (Nat i = 0; i < 10; i++) {
         levels[i] = MALLOCN(Car, 500);
         levels[i][0] = '\0';}
-    int maxLevel = 0;  
+    Nat maxLevel = 0;  
     affiche_descendance_recursive(g, x, 1, levels, &maxLevel);
-    int buf_pos = 0;
-    for (int i = 1; i <= maxLevel; i++) {
+    Nat buf_pos = 0;
+    for (Nat i = 1; i <= maxLevel; i++) {
         buff[buf_pos++] = '-';
         buff[buf_pos++] = ' ';
         if (i >= 10) {buff[buf_pos++] = '1'; buff[buf_pos++] = '0';
@@ -495,11 +495,11 @@ void affiche_descendance(Genealogie g, Ident x, Chaine buff) {
         buff[buf_pos++] = ' ';
         buff[buf_pos++] = ':';
         buff[buf_pos++] = '\n';
-        for (int j = 0; levels[i][j] != '\0'; j++) {
+        for (Nat j = 0; levels[i][j] != '\0'; j++) {
             buff[buf_pos++] = levels[i][j];}
         buff[buf_pos++] = '\n';}
     buff[buf_pos] = '\0';  
-    for (int i = 0; i < 10; i++) {
+    for (Nat i = 0; i < 10; i++) {
         FREE(levels[i]);}}
 
 // 
@@ -512,16 +512,16 @@ Nat dateNull(Date d1) {
 
 void addToBuffer(Chaine buff, Chaine nom) {
     if (buff[0] == '\0' || (buff[0] >= 0 && buff[0] <= 32)) {
-        int j = 0;
+        Nat j = 0;
         while (nom[j] != '\0') {
             buff[j] = nom[j];
             j++;}
         buff[j] = '\0';return;
     } else {
-        int i = 0;
+        Nat i = 0;
         while (buff[i] != '\0') {i++;}
         buff[i++] = ' ';
-        int j = 0;
+        Nat j = 0;
         while (nom[j] != '\0') {
         buff[i++] = nom[j++];
         buff[i] = '\0';}}}
@@ -537,7 +537,7 @@ Chaine chercherChaine(Chaine haystack, Chaine needle) {
 }
 
 
-void affiche_descendance_recursive(Genealogie g, Ident x, int level, Chaine* levels, int* maxLevel) {
+void affiche_descendance_recursive(Genealogie g, Ident x, Nat level, Chaine* levels, Nat* maxLevel) {
     if (g == NULL || x == omega) return;
     Individu current = getByIdent(g, x);
     if (current == NULL || current->ifaine == omega) return;  
