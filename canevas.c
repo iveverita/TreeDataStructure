@@ -208,6 +208,8 @@ void adjFils(Genealogie g, Ident idx, Ident fils, Ident p, Ident m) {
     if (g == NULL || idx == omega || (p == omega && m == omega)) return;
     Individu newChild = getByIdent(g, idx);
     if (newChild == NULL) return;
+    newChild->ipere = p;
+    newChild->imere = m;
     newChild->icadet = omega;
     newChild->ifaine = omega;
     Individu pere = (p != omega) ? getByIdent(g, p) : NULL;
