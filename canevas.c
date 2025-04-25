@@ -208,6 +208,7 @@ void adjFils(Genealogie g, Ident idx, Ident fils, Ident p, Ident m) {
     if (g == NULL || idx == omega || (p == omega && m == omega)) return;
     Individu newChild = getByIdent(g, idx);
     if (newChild == NULL) return;
+    // Mettre a jour des liasons parent - enfant
     newChild->ipere = p;
     newChild->imere = m;
     newChild->icadet = omega;
@@ -370,13 +371,14 @@ void deviennent_freres_soeurs(Genealogie g, Ident x, Ident y) {
         sourceInd = indY;
         targetInd = indX;
     } else {return;}
-
+    
     Ident sourceParent = (sourceInd->imere != omega) ? sourceInd->imere : sourceInd->ipere;
     Ident filsAine = (getByIdent(g, sourceParent) != NULL) ? getByIdent(g, sourceParent)->ifaine : omega;
     Ident sourceP = sourceInd->ipere;
     Ident sourceM = sourceInd->imere;
     adjFils(g, targetInd->id, filsAine, sourceP, sourceM);}
 
+// On lit l'individu x par parente avec y
 void devient_pere(Genealogie g, Ident x, Ident y) {
     if (g == NULL || x == omega || y == omega || x == y) return;
     Individu pere = getByIdent(g, x);
@@ -396,6 +398,7 @@ void devient_pere(Genealogie g, Ident x, Ident y) {
                 currentChild->icadet = y; forLoop =false;}
             currentChildId = currentChild->icadet;}}}
 
+// On lit l'individu x par parente avec y
 void devient_mere(Genealogie g, Ident x, Ident y) {
     if (g == NULL || x == omega || y == omega || x == y) return;
     Individu mere = getByIdent(g, x);
@@ -418,6 +421,7 @@ void devient_mere(Genealogie g, Ident x, Ident y) {
 
 //PARTIE 4:-----------------------------------------------------------------------------------------------
 //PRE: None
+// Verifier si x est un ancetre de y (parent, grand-parent, etc.)
 Bool estAncetre(Genealogie g, Ident x, Ident y) {
     if (x == omega || y == omega) return false;
     Individu ind = getByIdent(g,y);
@@ -426,6 +430,7 @@ Bool estAncetre(Genealogie g, Ident x, Ident y) {
     else return estAncetre(g,x,ind->ipere) || estAncetre(g,x,ind->imere);} 
 
 //PRE: None
+// Verifier si les deux individus on un ancetre commun
 Bool ontAncetreCommun(Genealogie g, Ident x, Ident y) {
     if (x == omega || y == omega) return false;
     Individu ind_x = getByIdent(g,x);
@@ -436,6 +441,7 @@ Bool ontAncetreCommun(Genealogie g, Ident x, Ident y) {
     else return ontAncetreCommun(g,ind_x->ipere,ind_y->ipere) || ontAncetreCommun(g,ind_x->ipere,ind_y->imere) || ontAncetreCommun(g,ind_x->imere,ind_y->ipere) || ontAncetreCommun(g,ind_x->imere,ind_y->imere);}
 
 //PRE: None
+// Obtenir le plus ancien ancetre d'un individu
 Ident plus_ancien(Genealogie g, Ident x){
     if (x == omega) return omega;
     Individu ind = getByIdent(g,x);
@@ -445,6 +451,7 @@ Ident plus_ancien(Genealogie g, Ident x){
     if (ind->imere == omega) return plus_ancien(g,ind->ipere);
     else return compDate(getByIdent(g,plus_ancien(g,ind->ipere))->naiss, getByIdent(g,plus_ancien(g,ind->imere))->naiss) < 0 ? plus_ancien(g,ind->ipere) : plus_ancien(g,ind->imere);}
 
+// Afficher par niveau la parente d'un individu 
 void affiche_parente(Genealogie g, Ident x, Chaine buff) {
     buff[0] = '\0'; 
     if (g == NULL || x == omega) return;
@@ -453,7 +460,7 @@ void affiche_parente(Genealogie g, Ident x, Chaine buff) {
     for (Nat i = 0; i < g->nb_individus && forLoop; i++) {
         if (g->tab[i]->id == x) {
             person = g->tab[i]; forLoop = false;}}
-    Chaine levels[11]; 
+    Chaine levels[11]; // la profondeur maximale de l'arbre
     for (Nat i = 0; i <= 10; i++) {
         levels[i] = MALLOCN(Car, 1000); 
         levels[i][0] = '\0';}
@@ -462,6 +469,7 @@ void affiche_parente(Genealogie g, Ident x, Chaine buff) {
         for (Nat i = 0; i <= 10; i++) {
             FREE(levels[i]);}
         return;}
+    // On aplique la parente vers le parents en augmentant le niveau par 1 a l'aide d'un function recursive
     if (person->ipere != omega) {affiche_parente_recursive(g, person->ipere, 1, levels, &maxLevel);}
     if (person->imere != omega) {affiche_parente_recursive(g, person->imere, 1, levels, &maxLevel);}
     for (Nat i = 1; i <= maxLevel; i++) {
@@ -474,14 +482,15 @@ void affiche_parente(Genealogie g, Ident x, Chaine buff) {
             chaineConcat(buff, " :\n");
             chaineConcat(buff, levels[i]);
             chaineConcat(buff, "\n");}}
-    for (Nat i = 0; i <= 10; i++) {
-        FREE(levels[i]);}}
+    for (Nat i = 0; i <= 10; i++) { // Liberation des niveaux
+        FREE(levels[i]);}} 
 
+// Afficher la descendance jusqu'a present d'un individu par niveau
 void affiche_descendance(Genealogie g, Ident x, Chaine buff) {
     buff[0] = '\0';  
     if (g == NULL || x == omega) return;
-    Chaine levels[10];
-    for (Nat i = 0; i < 10; i++) {
+    Chaine levels[11]; // la profondeur maximale de l'arbre
+    for (Nat i = 0; i <= 10; i++) {
         levels[i] = MALLOCN(Car, 500);
         levels[i][0] = '\0';}
     Nat maxLevel = 0;  
@@ -499,7 +508,7 @@ void affiche_descendance(Genealogie g, Ident x, Chaine buff) {
             buff[buf_pos++] = levels[i][j];}
         buff[buf_pos++] = '\n';}
     buff[buf_pos] = '\0';  
-    for (Nat i = 0; i < 10; i++) {
+    for (Nat i = 0; i <= 10; i++) {
         FREE(levels[i]);}}
 
 // 
@@ -510,6 +519,7 @@ void affiche_descendance(Genealogie g, Ident x, Chaine buff) {
 Nat dateNull(Date d1) {
     return d1.annee == 0 && d1.mois == 0 && d1.jour == 0;}
 
+// Copie du fonctionne chaineConcat
 void addToBuffer(Chaine buff, Chaine nom) {
     if (buff[0] == '\0' || (buff[0] >= 0 && buff[0] <= 32)) {
         Nat j = 0;
@@ -526,6 +536,7 @@ void addToBuffer(Chaine buff, Chaine nom) {
         buff[i++] = nom[j++];
         buff[i] = '\0';}}}
 
+// Recherche d'un substring dans un string
 Chaine chercherChaine(Chaine haystack, Chaine needle) {
     if (!*needle) return haystack;
     for (Chaine p = haystack; *p; p++) {
@@ -533,10 +544,9 @@ Chaine chercherChaine(Chaine haystack, Chaine needle) {
         Chaine n = needle;
         while (*h && *n && *h == *n) {h++;n++;}
         if (!*n) return p; }
-    return NULL; 
-}
+    return NULL; }
 
-
+// Affichage du descendance recursive
 void affiche_descendance_recursive(Genealogie g, Ident x, Nat level, Chaine* levels, Nat* maxLevel) {
     if (g == NULL || x == omega) return;
     Individu current = getByIdent(g, x);
@@ -551,10 +561,12 @@ void affiche_descendance_recursive(Genealogie g, Ident x, Nat level, Chaine* lev
         affiche_descendance_recursive(g, childId, level + 1, levels, maxLevel);
         childId = child->icadet;}}
 
+// Ajouter au meme niveau avec des espaces entre les individus
 void addToLevelBuffer(Chaine buffer, Chaine name) {
     if (buffer[0] != '\0') {chaineConcat(buffer, " ");}
     chaineConcat(buffer, name);}
 
+// Verifier si le nom existe dans le buffer
 Bool nameExistsInBuffer(Chaine buffer, Chaine name) {
     Chaine found = strstr(buffer, name);
     if (found == NULL) return false;
@@ -563,6 +575,7 @@ Bool nameExistsInBuffer(Chaine buffer, Chaine name) {
     Bool validAfter = (found[nameLen] == '\0') || (found[nameLen] == ' ');
     return validBefore && validAfter;}
 
+// Affichage du parente recursive
 void affiche_parente_recursive(Genealogie g, Ident x, Nat level, Chaine* levels, Nat* maxLevel) {
     if (g == NULL || x == omega) return;
     Individu current = NULL;
