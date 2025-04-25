@@ -1,4 +1,4 @@
-// canevas.c   pour projet Genealogie SDA2 2024-25�
+// canevas.c   pour projet Genealogie SDA2 2024-2025
 //
 
 // NOM: Veverita PRENOM: Ion
