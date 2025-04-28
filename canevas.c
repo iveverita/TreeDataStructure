@@ -99,10 +99,10 @@ void genealogieInit(Genealogie *g) {
     (*g)->id_cur = 0;
     (*g)->taille_max_tab = 10; 
     (*g)->tab = MALLOCN(Individu, (*g)->taille_max_tab);
-    if ((*g)->tab == NULL) {return;}
+    if ((*g)->tab == NULL) {FREE(*g);return;}
     (*g)->taille_max_rang = 10;
     (*g)->rang = MALLOCN(Nat, (*g)->taille_max_rang);
-    if ((*g)->rang == NULL) {return;}}
+    if ((*g)->rang == NULL) {FREE(*g); FREE((*g)->tab); return;}}
 
 // Liberation de la memoire d'un genealogie
 void genealogieFree(Genealogie *g) {
@@ -151,7 +151,7 @@ Nat cardinal(Genealogie g) {
 
 // K-ieme individu du tableau du genealogie
 Individu kieme(Genealogie g, Nat k) {
-    if (g == NULL || k >= g->nb_individus) {return NULL;}
+    if (g == NULL || k >= g->nb_individus || g->tab == NULL) {return NULL;}
     return g->tab[k];}
 
 // Renvoie un Individu trouve par son id
@@ -188,16 +188,16 @@ Individu getByName(Genealogie g, Chaine name, Date naissance) {
 //Insertion d'un individu en position pos avec tous les champs p m n d deja precises
 void insert(Genealogie g, Nat pos, Chaine s, Ident p, Ident m, Date n, Date d) {
     Individu nouvInd = nouvIndividu(++(g->id_cur), s, p, m, n, d); if (nouvInd == NULL) {g->id_cur--; return; } //Creation d'individu
-    if (pos > g->nb_individus) return;
+    if (pos > g->nb_individus) { freeIndividu(nouvInd); g->id_cur--; return;}
     Nat capacite_indv = cardinal(g);
     if (g->nb_individus == g->taille_max_rang) { // Reallocation du rang si besoin (x2)
         Nat* new_rang = REALLOC(g->rang, Nat, g->taille_max_rang * 2);
-        if (new_rang == NULL) return;
+        if (new_rang == NULL) { freeIndividu(nouvInd); g->id_cur--; return;}
         g->rang = new_rang;
         g->taille_max_rang *= 2;}
     if (g->nb_individus == g->taille_max_tab) { // Reallocation du tab si besoin (x2)
         Individu* new_tab = REALLOC(g->tab, Individu, g->taille_max_tab * 2);
-        if (new_tab == NULL) return;
+        if (new_tab == NULL) { freeIndividu(nouvInd); g->id_cur--; return;}
         g->tab = new_tab;
         g->taille_max_tab *= 2;}
     while (capacite_indv > pos) { // Parcours du dernier element jusqu'a pos pour decaler les Individus existants
@@ -474,6 +474,7 @@ void affiche_parente(Genealogie g, Ident x, Chaine buff) {
     Chaine levels[11]; // la profondeur maximale de l'arbre
     for (Nat i = 0; i <= 10; i++) {
         levels[i] = MALLOCN(Car, 1000); 
+        if (levels[i] == NULL) return;
         levels[i][0] = '\0';}
     Nat maxLevel = 0;
     if (person == NULL) {
@@ -503,6 +504,7 @@ void affiche_descendance(Genealogie g, Ident x, Chaine buff) {
     Chaine levels[11]; // la profondeur maximale de l'arbre
     for (Nat i = 0; i <= 10; i++) {
         levels[i] = MALLOCN(Car, 500);
+        if (levels[i] == NULL) return;
         levels[i][0] = '\0';}
     Nat maxLevel = 0;  
     affiche_descendance_recursive(g, x, 1, levels, &maxLevel);
@@ -567,7 +569,7 @@ void affiche_descendance_recursive(Genealogie g, Ident x, Nat level, Chaine* lev
     Ident childId = current->ifaine;
     while (childId != omega) {
         Individu child = getByIdent(g, childId);
-        if (chercherChaine(levels[level], child->nom) == NULL) {
+        if (child != NULL && chercherChaine(levels[level], child->nom) == NULL) {
             addToBuffer(levels[level], child->nom);}
         affiche_descendance_recursive(g, childId, level + 1, levels, maxLevel);
         childId = child->icadet;}}
@@ -579,7 +581,7 @@ void addToLevelBuffer(Chaine buffer, Chaine name) {
 
 // Verifier si le nom existe dans le buffer
 Bool nameExistsInBuffer(Chaine buffer, Chaine name) {
-    Chaine found = strstr(buffer, name);
+    Chaine found = chercherChaine(buffer, name);
     if (found == NULL) return false;
     Nat nameLen = chaineLongueur(name);
     Bool validBefore = (found == buffer) || (*(found-1) == ' ');
