@@ -534,6 +534,10 @@ Nat dateNull(Date d1) {
 
 // Copie du fonctionne chaineConcat
 void addToBuffer(Chaine buff, Chaine nom) {
+    Nat current_len = chaineLongueur(buff);
+    Nat nom_len = chaineLongueur(nom);
+    if (current_len + nom_len + 2 > 10 * LG_MAX) {
+        return; }
     if (buff[0] == '\0' || (buff[0] >= 0 && buff[0] <= 32)) {
         Nat j = 0;
         while (nom[j] != '\0') {
