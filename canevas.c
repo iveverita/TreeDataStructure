@@ -167,7 +167,7 @@ Nat getPos(Genealogie g, Chaine name) {
         Nat mid = left + (right - left) / 2; 
         if (mid >= g->nb_individus || g->tab[mid] == NULL) {
             return result;}
-        Nat cmp = chaineCompare(name, g->tab[mid]->nom);
+        Ent cmp = chaineCompare(name, g->tab[mid]->nom);
         if (cmp <= 0) {result = mid; right = mid - 1;
         } else {left = mid + 1;}}
     return result;
@@ -230,13 +230,13 @@ void adjFils(Genealogie g, Ident idx, Ident fils, Ident p, Ident m) {
         if (mere != NULL) mere->ifaine = idx;
         return;}
     Individu filsAine = getByIdent(g, fils); if (filsAine == NULL) return;
-    Nat dateComp = compDate(newChild->naiss, filsAine->naiss); // Comparons les date de naissance avec l'enfaine aine
+    Ent dateComp = compDate(newChild->naiss, filsAine->naiss); // Comparons les date de naissance avec l'enfaine aine
     if (dateComp < 0) { // Si idx est le plus grand
         newChild->icadet = fils;
         if (pere != NULL && pere->ifaine == fils) pere->ifaine = idx;
         if (mere != NULL && mere->ifaine == fils) mere->ifaine = idx;
     } else if (dateComp == 0) { // Si ils ont la meme date de naissance alors on tri par nom
-        Nat nomComp = chaineCompare(newChild->nom, filsAine->nom);
+        Ent nomComp = chaineCompare(newChild->nom, filsAine->nom);
         if (nomComp < 0) { 
             newChild->icadet = fils;
             if (pere != NULL && pere->ifaine == fils) pere->ifaine = idx;
@@ -792,4 +792,3 @@ int main()
     fgets(buf, 2, stdin);
     return 0;
 }
-
