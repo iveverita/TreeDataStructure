@@ -471,14 +471,14 @@ void affiche_parente(Genealogie g, Ident x, Chaine buff) {
     for (Nat i = 0; i < g->nb_individus && forLoop; i++) {
         if (g->tab[i]->id == x) {
             person = g->tab[i]; forLoop = false;}}
-    Chaine levels[11]; // la profondeur maximale de l'arbre
-    for (Nat i = 0; i <= 10; i++) {
+    Chaine levels[20]; // la profondeur maximale de l'arbre
+    for (Nat i = 0; i < 20; i++) {
         levels[i] = MALLOCN(Car, 1000); 
         if (levels[i] == NULL) return;
         levels[i][0] = '\0';}
     Nat maxLevel = 0;
     if (person == NULL) {
-        for (Nat i = 0; i <= 10; i++) {
+        for (Nat i = 0; i < 20; i++) {
             FREE(levels[i]);}
         return;}
     // On aplique la parente vers le parents en augmentant le niveau par 1 a l'aide d'un function recursive
@@ -494,15 +494,15 @@ void affiche_parente(Genealogie g, Ident x, Chaine buff) {
             chaineConcat(buff, " :\n");
             chaineConcat(buff, levels[i]);
             chaineConcat(buff, "\n");}}
-    for (Nat i = 0; i <= 10; i++) { // Liberation des niveaux
+    for (Nat i = 0; i < 20; i++) { // Liberation des niveaux
         FREE(levels[i]);}} 
 
 // Afficher la descendance jusqu'a present d'un individu par niveau
 void affiche_descendance(Genealogie g, Ident x, Chaine buff) {
     buff[0] = '\0';  
     if (g == NULL || x == omega) return;
-    Chaine levels[11]; // la profondeur maximale de l'arbre
-    for (Nat i = 0; i <= 10; i++) {
+    Chaine levels[20]; // la profondeur maximale de l'arbre
+    for (Nat i = 0; i < 20; i++) {
         levels[i] = MALLOCN(Car, 500);
         if (levels[i] == NULL) return;
         levels[i][0] = '\0';}
@@ -521,7 +521,7 @@ void affiche_descendance(Genealogie g, Ident x, Chaine buff) {
             buff[buf_pos++] = levels[i][j];}
         buff[buf_pos++] = '\n';}
     buff[buf_pos] = '\0';  
-    for (Nat i = 0; i <= 10; i++) {
+    for (Nat i = 0; i < 20; i++) {
         FREE(levels[i]);}}
 
 // 
