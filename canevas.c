@@ -703,7 +703,7 @@ int main()
     Ident ilily2 = adj(g, "Lily", ih, ig, dlily2, dnull); if (ilily2) {}; // Unused variable
 
 
-  for (Nat i = 0; i < cardinal(g); i++) {
+    for (Nat i = 0; i < cardinal(g); i++) {
         printf("%s\n", nomIndividu(kieme(g,i)));
     }
     printf("nb_individus: %d\n", cardinal(g));
