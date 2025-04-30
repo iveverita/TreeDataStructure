@@ -35,6 +35,11 @@ typedef struct s_genealogie {
     Nat* rang;
 } *Genealogie;
 
+// DEFINIR ICI VOS CONSTANTES
+#define tab_capacity 10
+#define max_depth 20
+#define max_length 500
+
 // PARTIE 1: PROTOTYPES des operations imposees
 Ent compDate(Date d1, Date d2);
 void genealogieInit(Genealogie* g);
@@ -97,10 +102,10 @@ void genealogieInit(Genealogie *g) {
     if (*g == NULL) {return;}
     (*g)->nb_individus = 0;
     (*g)->id_cur = 0;
-    (*g)->taille_max_tab = 10; 
+    (*g)->taille_max_tab = tab_capacity; 
     (*g)->tab = MALLOCN(Individu, (*g)->taille_max_tab);
     if ((*g)->tab == NULL) {FREE(*g);return;}
-    (*g)->taille_max_rang = 10;
+    (*g)->taille_max_rang = tab_capacity;
     (*g)->rang = MALLOCN(Nat, (*g)->taille_max_rang);
     if ((*g)->rang == NULL) {FREE(*g); FREE((*g)->tab); return;}}
 
@@ -471,14 +476,14 @@ void affiche_parente(Genealogie g, Ident x, Chaine buff) {
     for (Nat i = 0; i < g->nb_individus && forLoop; i++) {
         if (g->tab[i]->id == x) {
             person = g->tab[i]; forLoop = false;}}
-    Chaine levels[20]; // la profondeur maximale de l'arbre
-    for (Nat i = 0; i < 20; i++) {
-        levels[i] = MALLOCN(Car, 1000); 
+    Chaine levels[max_depth]; // la profondeur maximale de l'arbre
+    for (Nat i = 0; i < max_depth; i++) {
+        levels[i] = MALLOCN(Car, max_length); 
         if (levels[i] == NULL) return;
         levels[i][0] = '\0';}
     Nat maxLevel = 0;
     if (person == NULL) {
-        for (Nat i = 0; i < 20; i++) {
+        for (Nat i = 0; i < max_depth; i++) {
             FREE(levels[i]);}
         return;}
     // On aplique la parente vers le parents en augmentant le niveau par 1 a l'aide d'un function recursive
@@ -494,16 +499,16 @@ void affiche_parente(Genealogie g, Ident x, Chaine buff) {
             chaineConcat(buff, " :\n");
             chaineConcat(buff, levels[i]);
             chaineConcat(buff, "\n");}}
-    for (Nat i = 0; i < 20; i++) { // Liberation des niveaux
+    for (Nat i = 0; i < max_depth; i++) { // Liberation des niveaux
         FREE(levels[i]);}} 
 
 // Afficher la descendance jusqu'a present d'un individu par niveau
 void affiche_descendance(Genealogie g, Ident x, Chaine buff) {
     buff[0] = '\0';  
     if (g == NULL || x == omega) return;
-    Chaine levels[20]; // la profondeur maximale de l'arbre
-    for (Nat i = 0; i < 20; i++) {
-        levels[i] = MALLOCN(Car, 500);
+    Chaine levels[max_depth]; // la profondeur maximale de l'arbre
+    for (Nat i = 0; i < max_depth; i++) {
+        levels[i] = MALLOCN(Car, max_length);
         if (levels[i] == NULL) return;
         levels[i][0] = '\0';}
     Nat maxLevel = 0;  
@@ -521,7 +526,7 @@ void affiche_descendance(Genealogie g, Ident x, Chaine buff) {
             buff[buf_pos++] = levels[i][j];}
         buff[buf_pos++] = '\n';}
     buff[buf_pos] = '\0';  
-    for (Nat i = 0; i < 20; i++) {
+    for (Nat i = 0; i < max_depth; i++) {
         FREE(levels[i]);}}
 
 // 
@@ -684,18 +689,18 @@ int main()
 
     // Fred Weasley
     Date dfred = {1, 4, 1978};
-    Ident ifred = adj(g, "Fred", iaw, imw, dfred, dnull);
+    Ident ifred = adj(g, "Fred", iaw, imw, dfred, dnull); if (ifred) {}; // Unused variable
 
     // George Weasley
     Date dgeorge = {1, 4, 1978};
-    Ident igeorge = adj(g, "George", iaw, imw, dgeorge, dnull);
+    Ident igeorge = adj(g, "George", iaw, imw, dgeorge, dnull); if (igeorge) {}; // Unused variable 
 
     Date drose = {15, 2, 2006};  // estimated date
     Ident irose = adj(g, "Rose", ir, ihg, drose, dnull);
 
     // Lily Luna Potter (daughter of Harry and Ginny)
     Date dlily2 = {17, 2, 2008};  // estimated date
-    Ident ilily2 = adj(g, "Lily", ih, ig, dlily2, dnull);
+    Ident ilily2 = adj(g, "Lily", ih, ig, dlily2, dnull); if (ilily2) {}; // Unused variable
 
 
   for (Nat i = 0; i < cardinal(g); i++) {
